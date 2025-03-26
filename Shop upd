@@ -1,0 +1,102 @@
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
+
+
+class AutomationPracticeTest:
+    def __init__(self):
+        self.driver = webdriver.Chrome(executable_path='C:/chromedriver.exe')
+        self.wait = WebDriverWait(self.driver, 10)
+        self.driver.maximize_window()
+        self.driver.implicitly_wait(5)
+
+    def setup(self):
+        self.driver.get("https://practice.automationtesting.in/")
+
+    def login(self):
+        """Login to the website"""
+        self.driver.find_element(By.CSS_SELECTOR, "#menu-item-50 a").click()
+        self.driver.find_element(By.ID, "username").send_keys("twek56@gmail.com")
+        self.driver.find_element(By.ID, "password").send_keys("asdASDasd123!@#")
+        self.driver.find_element(By.NAME, "login").click()
+
+    def navigate_to_shop(self):
+        """Navigate to shop page"""
+        self.driver.find_element(By.CSS_SELECTOR, "#menu-item-40 > a").click()
+
+    def test_checkout_process(self):
+        """Test the checkout process"""
+        try:
+            # Setup and login
+            self.setup()
+            self.login()
+            self.navigate_to_shop()
+
+            # Add item to cart
+            self.driver.execute_script("window.scrollBy(0, 300);")
+            self.driver.find_element(By.XPATH, "//*[@id='content']/ul/li[4]/a[2]").click()
+            time.sleep(1)
+
+            # Go to cart
+            self.driver.find_element(By.CLASS_NAME, "wpmenucart-contents").click()
+            time.sleep(5)
+
+            # Proceed to checkout
+            self.driver.find_element(By.CLASS_NAME, "checkout-button").click()
+            time.sleep(5)
+
+            # Fill billing information
+            billing_info = {
+                "billing_first_name": "Andrey",
+                "billing_last_name": "Ostanin",
+                "billing_email": "twek56@gmail.com",
+                "billing_phone": "9252525252",
+                "billing_address_1": "Prospect Lenina",
+                "billing_city": "Nizhniy Tagil",
+                "billing_state": "Sverdlovskaya oblast",
+                "billing_postcode": "622049"
+            }
+
+            for field_id, value in billing_info.items():
+                self.driver.find_element(By.ID, field_id).send_keys(value)
+
+            # Select country
+            self.driver.find_element(By.ID, "select2-chosen-1").click()
+            self.driver.find_element(By.ID, "s2id_autogen1_search").send_keys("Russia")
+            self.driver.find_element(By.ID, "select2-results-1").click()
+
+            # Scroll and select payment method
+            self.driver.execute_script("window.scrollBy(0, 600);")
+            time.sleep(1)
+            self.driver.find_element(By.ID, "payment_method_cheque").click()
+
+            # Place order
+            self.driver.find_element(By.ID, "place_order").click()
+
+            # Verify order completion
+            self.wait.until(
+                EC.text_to_be_present_in_element(
+                    (By.CSS_SELECTOR, "div.woocommerce>p.woocommerce-thankyou-order-received"),
+                    "Thank you. Your order has been received."
+                )
+            )
+            self.wait.until(
+                EC.text_to_be_present_in_element(
+                    (By.CSS_SELECTOR, "div.woocommerce>ul>li.method>strong"),
+                    "Check Payments"
+                )
+            )
+            print("Checkout test passed successfully")
+
+        except Exception as e:
+            print(f"Test failed: {str(e)}")
+
+        finally:
+            self.driver.quit()
+
+
+if __name__ == "__main__":
+    test = AutomationPracticeTest()
+    test.test_checkout_process()
