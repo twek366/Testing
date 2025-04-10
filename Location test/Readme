@@ -1,0 +1,21 @@
+Установка frida tools и frida server
+1.	Установить frida server с https://github.com/frida/frida/releases актуальную версию frida-server-android-x86_64 и распаковать.
+2.	Установить frida-tools через python pip install.
+3.	Запустить эмуляцию через android studio
+4.	Отправить файл на эмулированное устройство, через Bash команды:
+adb cd C:\Users\”User”\downloads
+adb push frida-server-16.7.8-android-x86_64 /data/local/tmp
+adb shell ls -l /data/local/tmp
+(Проверка наличие файла и прав для выполнения, должны увидеть имя файла и приписку -rwxrwxrwx)
+adb shell chmod +x /data/local/tmp/frida-server-16.7.8-android-x86_64
+(Добавление прав если x отсутствует после проверки)
+5.	Запуск frida-server:
+adb shell "/data/local/tmp/frida-server-16.7.8-android-x86_64 &" 
+(Запуск сервера)
+adb shell ps | findstr frida
+(Проверка на наличие активного процесса)
+6.	Перейти в папку со скриптами и запустить из неё
+cd C:\Users\”User”\desktop 
+(Указывается путь к папке со скриптами)
+frida -U -f net.example _app -l script.js
+(Запуск скрипта, название приложения можно найти в logcat в Android stuido)
